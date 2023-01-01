@@ -36,7 +36,7 @@ contract SampleToken {
     constructor(uint256 _initialSupply) {
         _balances[msg.sender] = _initialSupply;
         _totalSupply = _initialSupply;
-        totalSales = 0;
+        _totalSales = 0;
         owner = msg.sender;
         sampleTokenSaleAddress = msg.sender;
 
