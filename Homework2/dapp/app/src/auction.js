@@ -16,17 +16,14 @@ if (!ethEnabled()) {
 }
 
 window.onload = async function init() {
-    const jsConfetti = new JSConfetti();
-
-    jsConfetti.addConfetti();
-
-    new FlipDown(1673732723, 'countdown').start();
-
     // RPC methods https://eips.ethereum.org/EIPS/eip-1474
     // https://docs.metamask.io/guide/getting-started.html#connecting-to-metamask
     const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
     window.bidder = accounts[0];
     console.log(accounts);
+
+    window.confetti = new JSConfetti();
+    $("#withdraw_button_container").hide();
 
     //web3.eth.defaultAccount = bidder;
     let sampleTokenContractABI = [{ "inputs": [{ "internalType": "uint256", "name": "_initialSupply", "type": "uint256" }], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "_owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "_spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "_value", "type": "uint256" }], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "_from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "_to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "_value", "type": "uint256" }], "name": "Transfer", "type": "event" }, { "inputs": [], "name": "name", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function", "constant": true }, { "inputs": [], "name": "symbol", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function", "constant": true }, { "inputs": [{ "internalType": "address", "name": "_owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function", "constant": true }, { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function", "constant": true }, { "inputs": [{ "internalType": "address", "name": "_to", "type": "address" }, { "internalType": "uint256", "name": "_value", "type": "uint256" }], "name": "transfer", "outputs": [{ "internalType": "bool", "name": "success", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "_spender", "type": "address" }, { "internalType": "uint256", "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "internalType": "bool", "name": "success", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "_owner", "type": "address" }, { "internalType": "address", "name": "_spender", "type": "address" }], "name": "allowance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function", "constant": true }, { "inputs": [{ "internalType": "address", "name": "_from", "type": "address" }, { "internalType": "address", "name": "_to", "type": "address" }, { "internalType": "uint256", "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "internalType": "bool", "name": "success", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "_tokenSaleAddress", "type": "address" }], "name": "setTokenSaleAddress", "outputs": [], "stateMutability": "nonpayable", "type": "function" }];
@@ -43,8 +40,15 @@ window.onload = async function init() {
     }, function (error, events) { console.log(events); })
         .then(function (bidEvents) {
             bidEvents.forEach((bidEvent) => {
-                $("#eventslog").append(bidEvent.returnValues.highestBidder + ' has bidden ' +
-                    bidEvent.returnValues.highestBid + ' tokens <br>');
+                $("#eventslog").append(
+                    `
+                    <li class="list-group-item d-flex flex-row text-truncate">
+                        <b class="px-1">${bidEvent.returnValues.highestBidder}</b> has bidden <b class="px-1">${bidEvent.returnValues.highestBid}</b>
+                        <img style="width: 1.5em; height: 1.5em;"
+                        src="https://img.icons8.com/external-soft-fill-juicy-fish/512/external-token-video-game-elements-soft-fill-soft-fill-juicy-fish.png" />
+                    </li>
+                    `
+                );
             })
         });
 
@@ -75,17 +79,22 @@ window.onload = async function init() {
                 topics: [web3.utils.sha3('BidEvent(address,uint256)')]
             }
         },
-        function (error, result) {
-            if (!error) {
-                console.log(result);
-                $("#eventslog").append(result.returnValues.highestBidder + ' has bidden' + result.returnValues.highestBid + ' tokens <br>');
-            } else {
+        function (error) {
+            if (error) {
                 console.log(error);
             }
         }
     ).on('data', function (event) {
         console.log(event);
-        $("#eventslog").append(event.returnValues.highestBidder + ' has bidden' + event.returnValues.highestBid + ' tokens <br>');
+        $("#eventslog").append(
+            `
+            <li class="list-group-item d-flex flex-row text-truncate">
+                <b class="px-1">${event.returnValues.highestBidder}</b> has bidden <b class="px-1">${event.returnValues.highestBid}</b>
+                <img style="width: 1.5em; height: 1.5em;"
+                src="https://img.icons8.com/external-soft-fill-juicy-fish/512/external-token-video-game-elements-soft-fill-soft-fill-juicy-fish.png" />
+            </li>
+            `
+        );
     });
 
     let SellEvent = sampleTokenSale.events.Sell(
@@ -133,28 +142,89 @@ function refreshInterface() {
     auction.methods.auction_end().call().then(function (endTimestamp) {
         const tsMs = endTimestamp * 1000; // convert to ms
         const endDate = new Date(tsMs);
-        document.getElementById("auction_end").innerHTML = endDate.toLocaleString();
+        window.auctionEndDate = endDate;
+
+        if (!window.countDown) {
+            //Math.floor(Date.now() / 1000) + 10
+            window.countDown = new FlipDown(Math.floor(endDate.getTime() / 1000), 'countdown')
+            .start()
+            .ifEnded(async () => {
+                highestBidder = await auction.methods.highestBidder().call();
+
+                if (highestBidder.toLowerCase() == bidder.toLowerCase()) {
+                    confetti.addConfetti();
+                } else {
+                    $("#withdraw_button_container").show();
+                }
+            });
+        } else if (Date.now() > endDate) {
+            if (highestBidder.toLowerCase() == bidder.toLowerCase()) {
+                $("#withdraw_button_container").hide();
+            } else {
+                $("#withdraw_button_container").show();
+            }
+        }
+
+        document.getElementById("auction_end").innerHTML = 
+        `
+        <b>${endDate.toLocaleString()}</b>
+        `;
     });
 
     auction.methods.highestBidder().call().then(function (result) {
-        document.getElementById("HighestBidder").innerHTML = result;
+        document.getElementById("HighestBidder").innerHTML = 
+        `
+        <b>${result}</b>
+        `;
     });
 
     auction.methods.highestBid().call().then(function (result) {
-        document.getElementById("HighestBid").innerHTML = `${result} tokens`;
+        document.getElementById("HighestBid").innerHTML = 
+        `
+        <div class="d-flex flex-col">
+            <b class="px-1">${result}</b>
+            <img style="width: 1.5em; height: 1.5em;"
+            src="https://img.icons8.com/external-soft-fill-juicy-fish/512/external-token-video-game-elements-soft-fill-soft-fill-juicy-fish.png" />
+        </div>
+        `;
     });
 
     auction.methods.STATE().call().then(function (result) {
-        document.getElementById("STATE").innerHTML = result;
+        let state = 'Unknown';
+        if (result == 0) {
+            state = 'Canceled';
+        } else if (result == 1 && !(new Date().getTime() > auctionEndDate.getTime())) {
+            state = 'Started';
+        } else if (new Date().getTime() > auctionEndDate.getTime()) {
+            state = 'Ended';
+        }
+
+        document.getElementById("STATE").innerHTML = 
+        `
+        <b>${state}</b>
+        `;
     });
 
     auction.methods.Mycar().call().then(function (result) {
-        document.getElementById("car_brand").innerHTML = result[0];
-        document.getElementById("registration_number").innerHTML = result[1];
+        document.getElementById("car_brand").innerHTML = 
+        `
+        <b>${result[0]}</b>
+        `;
+        document.getElementById("registration_number").innerHTML = 
+        `
+        <b>${result[1]}</b>
+        `;
     });
 
     auction.methods.bids(bidder).call().then(function (result) {
-        document.getElementById("MyBid").innerHTML = `${result} tokens`;
+        document.getElementById("MyBid").innerHTML = 
+        `
+        <div class="d-flex flex-col">
+            <b class="px-1">${result}</b>
+            <img style="width: 1.5em; height: 1.5em;"
+            src="https://img.icons8.com/external-soft-fill-juicy-fish/512/external-token-video-game-elements-soft-fill-soft-fill-juicy-fish.png" />
+        </div>
+        `;
     });
 
     sampleToken.methods.balanceOf(bidder).call().then(function (result) {
@@ -270,4 +340,14 @@ document.getElementById("buy_tokens_button").onclick = async function bid() {
 
         clearInfoMessages();
     }
+}
+
+document.getElementById("withdraw_button").onclick = function Withdraw_auction() {
+    auction.methods.withdraw().send(
+        {
+            from: window.bidder
+        },
+        function (error, result) {
+            console.log(result);
+        });
 }

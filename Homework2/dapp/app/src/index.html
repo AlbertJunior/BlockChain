@@ -134,7 +134,9 @@
                         <div class="card shadow-lg rounded-3">
                             <div class="card-header fs-3 d-flex justify-content-between align-items-center">
                                 Buy Tokens
-                                <button type="button" class="btn btn-outline-success d-flex flex-row justify-content-between align-items-center" id="buy_tokens_button">
+                                <button type="button"
+                                    class="btn btn-outline-success d-flex flex-row justify-content-between align-items-center"
+                                    id="buy_tokens_button">
                                     Buy
                                     <svg style="width: 30px; height: 40px" xmlns="http://www.w3.org/2000/svg"
                                         fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -194,10 +196,12 @@
                         <div class="card shadow-lg rounded-3">
                             <div class="card-header fs-3 d-flex justify-content-between align-items-center">
                                 Bid for the following car
-                                <button type="button" class="btn btn-outline-success d-flex flex-row justify-content-between align-items-center" id="bid_button">
+                                <button type="button"
+                                    class="btn btn-outline-success d-flex flex-row justify-content-between align-items-center"
+                                    id="bid_button">
                                     Bid
-                                    <svg style="width: 30px; height: 40px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" >
+                                    <svg style="width: 30px; height: 40px" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
                                     </svg>
@@ -214,9 +218,10 @@
                                         <span id='registration_number'></span>
                                     </li>
                                 </ul>
-                                <div class="form-floating mb-3">
+                                <hr class="hr hr-blurry" />
+                                <div class="form-floating mt-3">
                                     <input type="number" class="form-control" id="bidden_tokens" placeholder="123">
-                                    <label for="bidden_tokens">Number of tokens</label>
+                                    <label for="bidden_tokens">Number of tokens to bid</label>
                                 </div>
                             </div>
                             <div class="card-footer" style="min-height: 3em;">
@@ -227,15 +232,29 @@
 
                     <div class="col">
                         <div class="card shadow-lg rounded-3">
-                            <div class="card-header fs-3">
-                                Auction details
+                            <div class="card-header fs-3 d-flex justify-content-between align-items-center">
+                                <div class="py-2">Auction details</div>
+                                <div id="withdraw_button_container">
+                                    <button type="button"
+                                    class="btn btn-outline-success d-flex flex-row justify-content-between align-items-center"
+                                    id="withdraw_button">
+                                    <div class="px-1">Withdraw</div>
+                                    <svg style="width: 30px; height: 40px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 3.75H6.912a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859M12 3v8.25m0 0l-3-3m3 3l3-3" />
+                                    </svg>
+
+                                </button>
+                                </div>
                             </div>
                             <div class="card-body">
-                                <div class="w-100 container-fluid d-flex flex-row justify-content-center align-items-center">
+                                <div
+                                    class="w-100 mb-3 container-fluid d-flex flex-row justify-content-center align-items-center">
                                     <div id="countdown" class="flipdown"></div>
                                 </div>
                                 <ul class="list-group">
-                                    <li class="list-group-item">
+                                    <li class="list-group-item d-flex flex-row">
                                         My bid:
                                         <span id="MyBid"></span>
                                     </li>
@@ -247,8 +266,8 @@
                                         Auction Status:
                                         <span id="STATE"></span>
                                     </li>
-                                    <li class="list-group-item">
-                                        Auction Highest Bid;
+                                    <li class="list-group-item d-flex flex-row">
+                                        Auction Highest Bid:
                                         <span id="HighestBid"></span>
                                     </li>
                                     <li class="list-group-item">
@@ -281,12 +300,15 @@
         <!--Owner operations-->
         <div class="tab-pane fade" id="pills-owner-operations" role="tabpanel"
             aria-labelledby="pills-owner-operations-tab" tabindex="3">
-            <div class="col-lg-6" id="auction_owner_operations">
-                <div class="well">
-                    <div>
-                        <legend class="lead">Auction Operations</legend>
-                        <button class="btn btn-default" id="cancel_button" type="button">Cancel auction!</button>
-                        <button class="btn btn-default" id="destruct_button" type="button">Destruct auction!</button>
+            <div class="container-fluid w-100 d-flex flex-row justify-content-center align-items-center"
+                id="auction_owner_operations">
+                <div class="card w-25">
+                    <div class="card-header text-center fs-2">
+                        Auction Operations
+                    </div>
+                    <div class="card-body container-fluid d-flex flex-row justify-content-evenly">
+                        <button class="btn btn-warning" id="cancel_button" type="button">Cancel auction!</button>
+                        <button class="btn btn-danger" id="destruct_button" type="button">Destruct auction!</button>
                     </div>
                 </div>
             </div>
