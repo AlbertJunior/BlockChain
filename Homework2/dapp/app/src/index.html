@@ -2,86 +2,297 @@
 
 <head>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.3/dist/web3.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flipdown@0.3.2/src/flipdown.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flipdown@0.3.2/src/flipdown.min.css" rel="stylesheet">
+
+    <style>
+        #shadowBox {
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.2);
+            /* Black w/opacity/see-through */
+            border: 3px solid;
+        }
+
+        .rainbow {
+            text-align: center;
+            text-decoration: underline;
+            font-size: 32px;
+            font-family: monospace;
+            letter-spacing: 5px;
+        }
+
+        .rainbow_text_animated {
+            background: linear-gradient(to right, #6666ff, #0099ff, #00ff00, #ff3399, #6666ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: rainbow_animation 6s ease-in-out infinite;
+            background-size: 400% 100%;
+        }
+
+        @keyframes rainbow_animation {
+
+            0%,
+            100% {
+                background-position: 0 0;
+            }
+
+            50% {
+                background-position: 100% 0;
+            }
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scroll {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
 </head>
 
-<body>
-    <div class="col-lg-12">
-        <div class="page-header">
-            <h3>Car Auction Dapp</h3>
+<body class="p-3 no-scroll">
+    <nav class="navbar navbar-expand-lg navbar-light shadow-lg rounded fs-4" style="background-color: #cde8fd;">
+        <div class="container-fluid">
+            <div class="fs-2 navbar-brand">
+                <img style="width: 1.5em; height: 1.5em;"
+                    src="https://img.icons8.com/external-flaticons-lineal-color-flat-icons/512/external-car-rental-summer-travel-flaticons-lineal-color-flat-icons-4.png">
+                Car Auction
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+                aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="nav nav-pills me-auto mb-2 mb-lg-0">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-home" type="button"
+                            role="tab" aria-controls="pills-home" aria-selected="true">
+                            Home
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-token-shop" type="button"
+                            role="tab" aria-controls="pills-token-shop" aria-selected="false">
+                            Token Shop
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-auction" type="button"
+                            role="tab" aria-controls="pills-auction" aria-selected="false">
+                            Auction
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation" id="owner-operations-tab">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-owner-operations"
+                            type="button" role="tab" aria-controls="pills-owner-operations" aria-selected="false">
+                            Owner operations
+                        </button>
+                    </li>
+                </ul>
+                <span class="navbar-text mx-2 d-flex flex-row">
+                    <span class="px-2" id="MyTokens"></span>
+                    <img style="width: 1.5em; height: 1.5em;"
+                        src="https://img.icons8.com/external-soft-fill-juicy-fish/512/external-token-video-game-elements-soft-fill-soft-fill-juicy-fish.png" />
+                </span>
+            </div>
         </div>
-        <div class="col-lg-12">
-            <div class="well">
-                <legend class="lead">Buy tokens</legend>
-                <div class="form-group">
-                    <label for="buy_tokens_tokens" class="control-label">Tokens</label>
-                    <input class="form-control" type="text" id="buy_tokens_tokens" value="10"></input>
-                    
-                    <label for="buy_tokens_money" class="control-label">Money</label>
-                    <input class="form-control" type="text" id="buy_tokens_money" value="10"></input>
+    </nav>
+    <div class="tab-content p-5">
+
+        <!--Home-->
+        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
+            tabindex="0">
+            <div class="fs-4">
+                Welcome to the best car auction website that ever graced this earth. Based on the newest and greatest
+                <b class="rainbow rainbow_text_animated px-1">BLOCKCHAIN</b>
+                technology, this app will surely make your dreams of owning that model of Dacia come true!
+            </div>
+        </div>
+
+        <!--Token shop-->
+        <div class="tab-pane fade" id="pills-token-shop" role="tabpanel" aria-labelledby="pills-token-shop-tab"
+            tabindex="1">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col">
+                        <div class="card shadow-lg rounded-3">
+                            <div class="card-header fs-3 d-flex justify-content-between align-items-center">
+                                Buy Tokens
+                                <button type="button" class="btn btn-outline-success d-flex flex-row justify-content-between align-items-center" id="buy_tokens_button">
+                                    Buy
+                                    <svg style="width: 30px; height: 40px" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-floating mb-3">
+                                    <input type="number" class="form-control" id="buy_tokens_tokens" placeholder="123">
+                                    <label for="buy_tokens_tokens">Number of tokens</label>
+                                </div>
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="buy_tokens_money" placeholder="123">
+                                    <label for="buy_tokens_money">Money to exchange</label>
+                                </div>
+                            </div>
+                            <div class="card-footer" style="min-height: 3em;">
+                                <span id="buy_tokens_status"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col d-flex flex-column justify-content-center align-items-center">
+                        <div class="d-flex flex-row">
+                            <div class="fs-1 px-2 d-flex flex-row justify-content-center align-items-center"
+                                id="MyTokensShop"></div>
+                            <img style="width: 5em; height: 5em;"
+                                src="https://img.icons8.com/external-soft-fill-juicy-fish/512/external-token-video-game-elements-soft-fill-soft-fill-juicy-fish.png" />
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <button class="btn btn-default" id="buy_tokens_button" type="button">Buy tokens</button><br>
-                    <span id="buy_tokens_status"></span>
+                <div class="row">
+                    <div class="col p-5">
+                        <div class="card rounded-3">
+                            <div class="card-header text-center fs-2">
+                                Transactions
+                            </div>
+                            <div class="class-body">
+                                <ul class="list-group" id="bought_tokens_logs">
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="well">
-                <div>
-                    <legend class="lead">Car Details</legend>
-                    <label class="lead">Brand: </label><span id='car_brand'></span><br>
-                    <label class="lead">Registration Number: </label><span id='registration_number'></span>
-                </div>
-                <legend class="lead">Bid value</legend>
-                <small>eg. 100</small>
-                <div class="form-group">
-                    <input class="form-control" type="text" id="bidden_tokens" value="10"></input>
-                    <span id="valueValidation"></span>
+
+        <!--Auction-->
+        <div class="tab-pane fade" id="pills-auction" role="tabpanel" aria-labelledby="pills-auction-tab" tabindex="2">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col">
+                        <div class="card shadow-lg rounded-3">
+                            <div class="card-header fs-3 d-flex justify-content-between align-items-center">
+                                Bid for the following car
+                                <button type="button" class="btn btn-outline-success d-flex flex-row justify-content-between align-items-center" id="bid_button">
+                                    Bid
+                                    <svg style="width: 30px; height: 40px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" >
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        Brand:
+                                        <span id='car_brand'></span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        Registration number:
+                                        <span id='registration_number'></span>
+                                    </li>
+                                </ul>
+                                <div class="form-floating mb-3">
+                                    <input type="number" class="form-control" id="bidden_tokens" placeholder="123">
+                                    <label for="bidden_tokens">Number of tokens</label>
+                                </div>
+                            </div>
+                            <div class="card-footer" style="min-height: 3em;">
+                                <span id="biding_status"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="card shadow-lg rounded-3">
+                            <div class="card-header fs-3">
+                                Auction details
+                            </div>
+                            <div class="card-body">
+                                <div class="w-100 container-fluid d-flex flex-row justify-content-center align-items-center">
+                                    <div id="countdown" class="flipdown"></div>
+                                </div>
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        My bid:
+                                        <span id="MyBid"></span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        Auction End:
+                                        <span id="auction_end"></span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        Auction Status:
+                                        <span id="STATE"></span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        Auction Highest Bid;
+                                        <span id="HighestBid"></span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        Auction Highest Bidder:
+                                        <span id="HighestBidder"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <button class="btn btn-default" id="bid_button" type="button">Bid!</button><br>
-                    <span id="biding_status"></span>
+                <div class="row">
+                    <div class="col p-5">
+                        <div class="card rounded-3">
+                            <div class="card-header text-center fs-2">
+                                Transactions
+                            </div>
+                            <div class="class-body">
+                                <ul class="list-group" id="eventslog">
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="well">
-                <div>
-                    <legend class="lead">Auction Details</legend>
-                </div>
-                <div>
-                    <ul id='transfers'>
-                        <li><label class="lead">My Bid: </label> <span id="MyBid"></span></li>
-                        <li><label class="lead">My Tokens: </label> <span id="MyTokens"></span></li>
-                        <li><label class="lead">Auction End: </label> <span id="auction_end"></span></li>
-                        <li><label class="lead">Auction Status: </label> <span id="STATE"></span></li>
-                        <li><label class="lead">Auction Highest Bid: </label> <span id="HighestBid"></span></li>
-                        <li><label class="lead">Auction Highest Bider: </label> <span id="HighestBidder"></span></li>
-                    </ul>
-                </div>
-                <br>
-                <div>
-                    <legend class="lead">Events Logs </legend>
-                    <span id="eventslog"></span>
+
+        <!--Owner operations-->
+        <div class="tab-pane fade" id="pills-owner-operations" role="tabpanel"
+            aria-labelledby="pills-owner-operations-tab" tabindex="3">
+            <div class="col-lg-6" id="auction_owner_operations">
+                <div class="well">
+                    <div>
+                        <legend class="lead">Auction Operations</legend>
+                        <button class="btn btn-default" id="cancel_button" type="button">Cancel auction!</button>
+                        <button class="btn btn-default" id="destruct_button" type="button">Destruct auction!</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-6" id="auction_owner_operations">
-        <div class="well">
-            <div>
-                <legend class="lead">Auction Operations</legend>
-                <button class="btn btn-default" id="cancel_button" type="button">Cancel auction!</button>
-                <button class="btn btn-default" id="destruct_button" type="button">Destruct auction!</button>
-            </div>
-        </div>
-    </div>
+
     <script src="auction.js"></script>
 </body>
 

@@ -16,6 +16,11 @@ if (!ethEnabled()) {
 }
 
 window.onload = async function init() {
+    const jsConfetti = new JSConfetti();
+
+    jsConfetti.addConfetti();
+
+    new FlipDown(1673732723, 'countdown').start();
 
     // RPC methods https://eips.ethereum.org/EIPS/eip-1474
     // https://docs.metamask.io/guide/getting-started.html#connecting-to-metamask
@@ -31,46 +36,6 @@ window.onload = async function init() {
     window.sampleToken = new web3.eth.Contract(sampleTokenContractABI, sampleTokenAddress);
     window.auction = new web3.eth.Contract(myauctionContractABI, myAuctionAddress);
     window.sampleTokenSale = new web3.eth.Contract(sampleTokenSaleContractABI, sampleTokenSaleAddress);
-
-    auction.methods.auction_end().call().then(function (endTimestamp) {
-        const tsMs = endTimestamp * 1000; // convert to ms
-        const endDate = new Date(tsMs);
-        document.getElementById("auction_end").innerHTML = endDate.toLocaleString();
-    });
-
-    auction.methods.highestBidder().call().then(function (result) {
-        document.getElementById("HighestBidder").innerHTML = result;
-    });
-
-    auction.methods.highestBid().call().then(function (result) {
-        document.getElementById("HighestBid").innerHTML = `${result} tokens`;
-    });
-
-    auction.methods.STATE().call().then(function (result) {
-        document.getElementById("STATE").innerHTML = result;
-    });
-
-    auction.methods.Mycar().call().then(function (result) {
-        document.getElementById("car_brand").innerHTML = result[0];
-        document.getElementById("registration_number").innerHTML = result[1];
-    });
-
-    auction.methods.bids(bidder).call().then(function (result) {
-        document.getElementById("MyBid").innerHTML = `${result} tokens`;
-    });
-
-    sampleToken.methods.balanceOf(bidder).call().then(function (result) {
-        document.getElementById("MyTokens").innerHTML = `${result} tokens`;
-    });
-
-    let auction_owner = null;
-    auction.methods.get_owner().call().then(function (result) {
-        auction_owner = result;
-        console.log(result);
-        if (bidder.toLowerCase() != auction_owner.toLowerCase())
-            $("#auction_owner_operations").hide();
-    }
-    );
 
     auction.getPastEvents('BidEvent', {
         fromBlock: 0,
@@ -89,13 +54,18 @@ window.onload = async function init() {
     }, function (error, events) { console.log(events); })
         .then(function (sellEvents) {
             sellEvents.forEach((sellEvent) => {
-                $("#eventslog").append(sellEvent.returnValues._buyer + ' bought ' +
-                    sellEvent.returnValues._amount + ' tokens  <br>');
+                $("#bought_tokens_logs").append(
+                    `
+                    <li class="list-group-item d-flex flex-row text-truncate">
+                        <b class="px-1">${sellEvent.returnValues._buyer}</b> bought <b class="px-1">${sellEvent.returnValues._amount}</b>
+                        <img style="width: 1.5em; height: 1.5em;"
+                        src="https://img.icons8.com/external-soft-fill-juicy-fish/512/external-token-video-game-elements-soft-fill-soft-fill-juicy-fish.png" />
+                    </li>
+                    `
+                );
             });
         });
 
-    /*filter.get(callback): Returns all of the log entries that fit the filter.
-    filter.watch(callback): Watches for state changes that fit the filter and calls the callback. See this note for details.*/
     let BidEvent = auction.events.BidEvent(
         {
             filter: {
@@ -127,19 +97,22 @@ window.onload = async function init() {
                 topics: [web3.utils.sha3('Sell(address,uint256)')]
             }
         },
-        function (error, result) {
-            if (!error) {
-                console.log(result);
-                $("#eventslog").append(result.returnValues._buyer + ' bought ' +
-                    result.returnValues._amount + ' tokens <br>');
-            } else {
+        function (error) {
+            if (error) {
                 console.log(error);
             }
         }
     ).on('data', function (event) {
         console.log(event);
-        $("#eventslog").append(event.returnValues._buyer + ' bought ' +
-            event.returnValues._amount + ' tokens <br>');
+        $("#bought_tokens_logs").append(
+            `
+            <li class="list-group-item d-flex flex-row text-truncate">
+                <b class="px-1">${event.returnValues._buyer}</b> bought <b class="px-1">${event.returnValues._amount}</b>
+                <img style="width: 1.5em; height: 1.5em;"
+                src="https://img.icons8.com/external-soft-fill-juicy-fish/512/external-token-video-game-elements-soft-fill-soft-fill-juicy-fish.png" />
+            </li>
+            `
+        );
     });
 
     let CanceledEvent = auction.events.CanceledEvent(
@@ -152,12 +125,70 @@ window.onload = async function init() {
             }
         }
     );
+
+    refreshInterface();
 }
 
+function refreshInterface() {
+    auction.methods.auction_end().call().then(function (endTimestamp) {
+        const tsMs = endTimestamp * 1000; // convert to ms
+        const endDate = new Date(tsMs);
+        document.getElementById("auction_end").innerHTML = endDate.toLocaleString();
+    });
+
+    auction.methods.highestBidder().call().then(function (result) {
+        document.getElementById("HighestBidder").innerHTML = result;
+    });
+
+    auction.methods.highestBid().call().then(function (result) {
+        document.getElementById("HighestBid").innerHTML = `${result} tokens`;
+    });
+
+    auction.methods.STATE().call().then(function (result) {
+        document.getElementById("STATE").innerHTML = result;
+    });
+
+    auction.methods.Mycar().call().then(function (result) {
+        document.getElementById("car_brand").innerHTML = result[0];
+        document.getElementById("registration_number").innerHTML = result[1];
+    });
+
+    auction.methods.bids(bidder).call().then(function (result) {
+        document.getElementById("MyBid").innerHTML = `${result} tokens`;
+    });
+
+    sampleToken.methods.balanceOf(bidder).call().then(function (result) {
+        document.getElementById("MyTokens").innerHTML = `${result}`;
+        document.getElementById("MyTokensShop").innerHTML = `${result}`;
+    });
+
+    let auction_owner = null;
+    auction.methods.get_owner().call().then(function (result) {
+        auction_owner = result;
+        console.log(result);
+        if (bidder.toLowerCase() != auction_owner.toLowerCase()) {
+            $("#auction_owner_operations").hide();
+            $("#owner-operations-tab").hide();
+        } else {
+            $("#auction_owner_operations").show();
+            $("#owner-operations-tab").show();
+        }
+    }
+    );
+}
+
+function clearInfoMessages() {
+    setTimeout(() => {
+        document.getElementById("buy_tokens_status").innerHTML = "";
+        document.getElementById("biding_status").innerHTML = "";
+    }, 5000);
+}
 
 //alternative to ethereum.request({ method: 'eth_requestAccounts' });
 ethereum.on('accountsChanged', function (accounts) {
     window.bidder = accounts[0];
+
+    refreshInterface();
 });
 
 document.getElementById("bid_button").onclick = async function bid() {
@@ -186,9 +217,13 @@ document.getElementById("bid_button").onclick = async function bid() {
             }
         );
         document.getElementById("biding_status").innerHTML = `Successfull bid, the transaction ID is ${transactionId}`;
+
+        clearInfoMessages();
+        refreshInterface();
     } catch (e) {
         console.log(e);
         document.getElementById("biding_status").innerHTML = `An error occured while bidding through metamask`;
+        clearInfoMessages();
     }
 }
 
@@ -226,8 +261,13 @@ document.getElementById("buy_tokens_button").onclick = async function bid() {
             }
         );
         document.getElementById("buy_tokens_status").innerHTML = `Successfully bought ${tokens} tokens!`;
-    } catch(e) {
-        console.log(e)
+
+        clearInfoMessages();
+        refreshInterface();
+    } catch (e) {
+        console.log(e);
         document.getElementById("buy_tokens_status").innerHTML = "An error occurred while buying tokens. Transaction was reverted.";
+
+        clearInfoMessages();
     }
 }
